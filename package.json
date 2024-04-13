@@ -1,0 +1,19 @@
+{
+  "name": "miniflux-to-discord",
+  "version": "1.0.0",
+  "description": "A small application to forward Miniflux's webhooks to Discord",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stuart Thomson",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.4.5"
+  }
+}

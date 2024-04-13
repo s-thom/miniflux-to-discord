@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "outDir": "dist"
+  },
+  "include": ["src/"]
+}
