@@ -1,0 +1,23 @@
+# fly.toml app configuration file generated for miniflux-to-discord-2346 on 2024-04-15T20:16:57+12:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app            = 'miniflux-to-discord-2346'
+primary_region = 'syd'
+
+[build]
+
+[env]
+  LISTEN_HOST = "0.0.0.0"
+
+[http_service]
+  internal_port        = 80
+  force_https          = true
+  auto_stop_machines   = true
+  auto_start_machines  = true
+  min_machines_running = 0
+  processes            = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'

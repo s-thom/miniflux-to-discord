@@ -11,6 +11,7 @@
   "author": "Stuart Thomson",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.4",
     "@types/node": "^20.12.7",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
