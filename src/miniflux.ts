@@ -1,3 +1,5 @@
+import type { preValidationAsyncHookHandler } from "fastify";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import PQueue from "p-queue";
 
 export interface Feed {
@@ -37,6 +39,41 @@ export interface Icon {
   id: number;
   data: string;
   mime_type: string;
+}
+
+export function getSignatureCheckHook(secret: string): any {
+  const hmac = createHmac("sha256", secret);
+
+  const hook: preValidationAsyncHookHandler = async (req, res) => {
+    const signatureHeader = req.headers["x-miniflux-signature"] as string;
+    if (!signatureHeader) {
+      req.log.error("No X-Miniflux-Signature header present on request");
+      res.code(400);
+      throw new Error("No X-Miniflux-Signature header present on request");
+    }
+
+    const rawBody = (req as any).rawBody;
+    if (!rawBody) {
+      res.code(500);
+      throw new Error("Internal error in validation");
+    }
+    const computedSignature = hmac
+      .update((req as any).rawBody)
+      .digest("hex")
+      .toLowerCase();
+
+    if (
+      !timingSafeEqual(
+        Buffer.from(signatureHeader),
+        Buffer.from(computedSignature)
+      )
+    ) {
+      req.log.error("Invalid signature");
+      throw new Error("Invalid signature");
+    }
+  };
+
+  return hook;
 }
 
 export class MinifluxClient {

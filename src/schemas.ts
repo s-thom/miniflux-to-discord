@@ -35,7 +35,7 @@ const newEntrySchema = z.object({
   starred: z.boolean(),
   reading_time: z.number(),
   enclosures: z.array(enclosureSchema),
-  tags: z.array(z.string()),
+  tags: z.array(z.string()).nullable(),
 });
 
 export type NewEntry = z.TypeOf<typeof newEntrySchema>;
@@ -64,7 +64,7 @@ const saveEntrySchema = z.object({
   starred: z.boolean(),
   reading_time: z.number(),
   enclosures: z.array(enclosureSchema),
-  tags: z.array(z.string()),
+  tags: z.array(z.string()).nullable(),
   feed: feedSchema,
 });
 

@@ -1,27 +1,39 @@
-import Fastify from "fastify";
+import { EmbedBuilder } from "discord.js";
 import "dotenv/config";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import Fastify from "fastify";
 import {
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
+import rawBody from "raw-body";
+import { safeParse } from "secure-json-parse";
+import { DiscordWebhookClient } from "./discord.js";
+import { MinifluxClient, getSignatureCheckHook } from "./miniflux.js";
 import { MinifluxWebhookRequestBody, type NewEntry } from "./schemas.js";
-import PQueue from "p-queue";
-import { EmbedBuilder, WebhookClient } from "discord.js";
-import { MinifluxClient } from "./miniflux.js";
 
 const DISCORD_MAX_EMBEDS_PER_MESSAGE = 10;
-
-const queue = new PQueue({});
 
 const app = Fastify({
   logger: true,
 }).withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
-await app.register(import("fastify-raw-body"), {
-  global: false,
+
+app.addContentTypeParser("application/json", (req, payload, done) => {
+  rawBody(
+    payload,
+    {
+      length: req.headers["content-length"],
+      limit: "1mb",
+      encoding: "utf8",
+    },
+    (err, body) => {
+      if (err) return done(err);
+      (req as any).rawBody = body;
+      done(null, safeParse(body));
+    }
+  );
 });
 
 const missingEnv: string[] = [];
@@ -45,8 +57,7 @@ if (missingEnv.length > 0) {
   process.exit(1);
 }
 
-const hmac = createHmac("sha256", MINIFLUX_WEBHOOK_SECRET);
-const webhookClient = new WebhookClient({ url: DISCORD_WEBHOOK_URL });
+const webhookClient = new DiscordWebhookClient(DISCORD_WEBHOOK_URL);
 const minifluxClient = new MinifluxClient(MINIFLUX_BASE_URL, MINIFLUX_API_KEY);
 
 async function sendEntriesToDiscord(entries: NewEntry[]) {
@@ -83,9 +94,7 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
       })
     );
 
-    queue.add(async () => {
-      await webhookClient.send({ embeds });
-    });
+    await webhookClient.send({ embeds });
   }
 }
 
@@ -96,37 +105,7 @@ app.post(
   {
     //@ts-ignore
     rawBody: true,
-    preHandler: (req, res, next) => {
-      try {
-        const signatureHeader = req.headers["X-Miniflux-Signature"] as string;
-        if (!signatureHeader) {
-          req.log.error("No X-Miniflux-Signature header present on request");
-          res.code(400);
-          next(new Error("No X-Miniflux-Signature header present on request"));
-          return;
-        }
-
-        const computedSignature = hmac
-          .update(req.rawBody!)
-          .digest("hex")
-          .toLowerCase();
-
-        if (
-          !timingSafeEqual(
-            Buffer.from(signatureHeader),
-            Buffer.from(computedSignature)
-          )
-        ) {
-          throw new Error();
-        }
-      } catch (err) {
-        res.code(403);
-        next(new Error("Invalid signature"));
-        return;
-      }
-
-      next();
-    },
+    preValidation: getSignatureCheckHook(MINIFLUX_WEBHOOK_SECRET),
     schema: {
       body: MinifluxWebhookRequestBody,
     },

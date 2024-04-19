@@ -21,9 +21,10 @@
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
-    "fastify-raw-body": "^4.3.0",
     "fastify-type-provider-zod": "^1.1.9",
     "p-queue": "^8.0.1",
+    "raw-body": "^2.5.2",
+    "secure-json-parse": "^2.7.0",
     "zod": "^3.22.4"
   }
 }
