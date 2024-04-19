@@ -1,57 +1,28 @@
 import { EmbedBuilder } from "discord.js";
 import "dotenv/config";
-import Fastify from "fastify";
-import {
-  serializerCompiler,
-  validatorCompiler,
-  type ZodTypeProvider,
-} from "fastify-type-provider-zod";
-import rawBody from "raw-body";
-import { safeParse } from "secure-json-parse";
 import { DiscordWebhookClient } from "./discord.js";
+import { FastifyServer } from "./fastify.js";
 import { MinifluxClient, getSignatureCheckHook } from "./miniflux.js";
 import { MinifluxWebhookRequestBody, type NewEntry } from "./schemas.js";
 
 const DISCORD_MAX_EMBEDS_PER_MESSAGE = 10;
 
-const app = Fastify({
-  logger: true,
-}).withTypeProvider<ZodTypeProvider>();
-app.setValidatorCompiler(validatorCompiler);
-app.setSerializerCompiler(serializerCompiler);
-
-app.addContentTypeParser("application/json", (req, payload, done) => {
-  rawBody(
-    payload,
-    {
-      length: req.headers["content-length"],
-      limit: "1mb",
-      encoding: "utf8",
-    },
-    (err, body) => {
-      if (err) return done(err);
-      (req as any).rawBody = body;
-      done(null, safeParse(body));
-    }
-  );
-});
+const server = new FastifyServer();
 
 const missingEnv: string[] = [];
-function getEnv(name: string): string | undefined;
-function getEnv(name: string, required: true): string;
-function getEnv(name: string, required?: boolean): string | undefined {
+function getRequiredEnv(name: string): string {
   const value = process.env[name];
-  if (required && !value) {
+  if (!value) {
     missingEnv.push(name);
   }
-  return value;
+  return value ?? "";
 }
-const DISCORD_WEBHOOK_URL = getEnv("DISCORD_WEBHOOK_URL", true);
-const MINIFLUX_API_KEY = getEnv("MINIFLUX_API_KEY", true);
-const MINIFLUX_WEBHOOK_SECRET = getEnv("MINIFLUX_WEBHOOK_SECRET", true);
-const MINIFLUX_BASE_URL = getEnv("MINIFLUX_BASE_URL", true);
+const DISCORD_WEBHOOK_URL = getRequiredEnv("DISCORD_WEBHOOK_URL");
+const MINIFLUX_API_KEY = getRequiredEnv("MINIFLUX_API_KEY");
+const MINIFLUX_WEBHOOK_SECRET = getRequiredEnv("MINIFLUX_WEBHOOK_SECRET");
+const MINIFLUX_BASE_URL = getRequiredEnv("MINIFLUX_BASE_URL");
 if (missingEnv.length > 0) {
-  app.log.fatal(
+  server.logger.fatal(
     `Missing required environment variables: ${missingEnv.join(", ")}`
   );
   process.exit(1);
@@ -98,19 +69,16 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
   }
 }
 
-app.get("/ping", () => ({ ok: true }));
-
-app.post(
-  "/webhook",
-  {
-    //@ts-ignore
-    rawBody: true,
-    preValidation: getSignatureCheckHook(MINIFLUX_WEBHOOK_SECRET),
-    schema: {
-      body: MinifluxWebhookRequestBody,
-    },
+server.addRoute({
+  method: "POST",
+  url: "/webhook",
+  //@ts-ignore
+  rawBody: true,
+  preValidation: getSignatureCheckHook(MINIFLUX_WEBHOOK_SECRET),
+  schema: {
+    body: MinifluxWebhookRequestBody,
   },
-  async (req, res) => {
+  handler: async (req, res) => {
     if (req.body.event_type === "new_entries") {
       await sendEntriesToDiscord(req.body.entries);
       return { done: true };
@@ -118,15 +86,10 @@ app.post(
 
     res.code(400);
     throw new Error("Invalid event type");
-  }
-);
+  },
+});
 
-try {
-  await app.listen({
-    host: getEnv("LISTEN_HOST") ?? "127.0.0.1",
-    port: parseInt(getEnv("LISTEN_PORT") ?? "80"),
-  });
-} catch (err) {
-  app.log.fatal("Unable to start server");
-  process.exit(1);
-}
+await server.listen(
+  process.env.LISTEN_HOST ?? "127.0.0.1",
+  parseInt(process.env.LISTEN_PORT ?? "80")
+);
