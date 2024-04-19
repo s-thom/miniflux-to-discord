@@ -26,5 +26,9 @@
     "raw-body": "^2.5.2",
     "secure-json-parse": "^2.7.0",
     "zod": "^3.22.5"
+  },
+  "dockerfile": {
+    "cmd": "[ \"node\", \"dist/index.js\" ]",
+    "port": 80
   }
 }

@@ -1,0 +1,38 @@
+name: Fly
+
+on:
+  schedule:
+    - cron: "13 6 1 * *"
+
+jobs:
+  deploy:
+    name: Update Dockerfile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: "npm"
+
+      - name: Update Dockerfile
+        run: |
+          npx dockerfile --force
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: |
+            Dockerfile
+          commit-message: "Update Dockerfile"
+          branch: auto-update/dockerfile
+          delete-branch: true
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          title: "Update Dockerfile"
+          body: |
+            Update Dockerfile using Fly CLI
