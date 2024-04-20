@@ -12,6 +12,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.5",
+    "@types/mime-types": "^2.1.4",
     "@types/node": "^20.12.7",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
@@ -22,6 +23,7 @@
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
     "fastify-type-provider-zod": "^1.1.9",
+    "mime-types": "^2.1.35",
     "p-queue": "^8.0.1",
     "raw-body": "^2.5.2",
     "secure-json-parse": "^2.7.0",

@@ -1,5 +1,6 @@
-import { EmbedBuilder } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder } from "discord.js";
 import "dotenv/config";
+import { extension } from "mime-types";
 import { DiscordWebhookClient } from "./discord.js";
 import { FastifyServer } from "./fastify.js";
 import { MinifluxClient, getSignatureCheckHook } from "./miniflux.js";
@@ -44,6 +45,8 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
   }
 
   for (const batch of batches) {
+    const files: AttachmentBuilder[] = [];
+
     const embeds = await Promise.all(
       batch.map(async (entry) => {
         const feed = await minifluxClient.getFeed(entry.feed_id);
@@ -53,19 +56,36 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
 
         const publishDate = entry.published_at ?? entry.created_at;
 
-        return new EmbedBuilder()
+        const builder = new EmbedBuilder()
           .setTitle(entry.title)
           .setURL(new URL(`/unread/${entry.id}`, MINIFLUX_BASE_URL).toString())
           .setAuthor({
             name: feed.title,
-            iconURL: icon?.data,
           })
           .setTimestamp(publishDate ? new Date(publishDate) : undefined)
           .setColor("NotQuiteBlack");
+
+        if (icon) {
+          const [typeBase64, data] = icon.data.split(",");
+          const ext = extension(typeBase64);
+          const dataArray = Buffer.from(data, "base64");
+
+          const attachment = new AttachmentBuilder(dataArray, {
+            name: `${entry.id}.${ext}`,
+          });
+
+          files.push(attachment);
+          builder.setAuthor({
+            name: feed.title,
+            iconURL: `attachment://${attachment.name}`,
+          });
+        }
+
+        return builder;
       })
     );
 
-    await webhookClient.send({ embeds });
+    await webhookClient.send({ embeds, files });
   }
 }
 
