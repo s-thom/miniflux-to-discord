@@ -64,7 +64,32 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
             name: feed.title,
           })
           .setTimestamp(publishDate ? new Date(publishDate) : undefined)
-          .setColor("NotQuiteBlack");
+          .setColor("NotQuiteBlack")
+          .setFields([
+            {
+              name: "Reading time",
+              value: `${entry.reading_time} minutes`,
+              inline: true,
+            },
+          ]);
+
+        if (entry.enclosures) {
+          const images = entry.enclosures.filter((enclosure) => {
+            switch (enclosure.mime_type) {
+              case "image/png":
+              case "image/jpeg":
+              case "image/jpg":
+              case "image/webp":
+              case "image/avif":
+                return true;
+              default:
+                return false;
+            }
+          });
+          if (images.length > 0) {
+            builder.setThumbnail(images[0].url);
+          }
+        }
 
         if (icon) {
           const [typeBase64, data] = icon.data.split(",");
