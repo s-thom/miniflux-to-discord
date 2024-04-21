@@ -23,6 +23,7 @@
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
     "fastify-type-provider-zod": "^1.1.9",
+    "ico-to-png": "^0.2.1",
     "mime-types": "^2.1.35",
     "p-queue": "^8.0.1",
     "raw-body": "^2.5.2",

@@ -1,5 +1,6 @@
 import { AttachmentBuilder, EmbedBuilder } from "discord.js";
 import "dotenv/config";
+import icoToPng from "ico-to-png";
 import { extension } from "mime-types";
 import { DiscordWebhookClient } from "./discord.js";
 import { FastifyServer } from "./fastify.js";
@@ -68,10 +69,15 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
         if (icon) {
           const [typeBase64, data] = icon.data.split(",");
           const ext = extension(typeBase64);
-          const dataArray = Buffer.from(data, "base64");
+          let dataArray = Buffer.from(data, "base64");
+
+          // As far as I can tell, Miniflux is always returning an ico file.
+          if (ext === "ico") {
+            dataArray = await icoToPng(dataArray, 256, { scaleUp: true });
+          }
 
           const attachment = new AttachmentBuilder(dataArray, {
-            name: `${entry.id}.${ext}`,
+            name: `${entry.id}.png`,
           });
 
           files.push(attachment);
