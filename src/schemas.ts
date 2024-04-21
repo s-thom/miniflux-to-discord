@@ -34,7 +34,7 @@ const newEntrySchema = z.object({
   share_code: z.string(),
   starred: z.boolean(),
   reading_time: z.number(),
-  enclosures: z.array(enclosureSchema),
+  enclosures: z.array(enclosureSchema).nullable(),
   tags: z.array(z.string()).nullable(),
 });
 
@@ -63,7 +63,7 @@ const saveEntrySchema = z.object({
   share_code: z.string(),
   starred: z.boolean(),
   reading_time: z.number(),
-  enclosures: z.array(enclosureSchema),
+  enclosures: z.array(enclosureSchema).nullable(),
   tags: z.array(z.string()).nullable(),
   feed: feedSchema,
 });
