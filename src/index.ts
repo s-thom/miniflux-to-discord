@@ -73,7 +73,7 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
           .setFields([
             {
               name: "Reading time",
-              value: `${entry.reading_time} minutes`,
+              value: `${entry.reading_time} minute${entry.reading_time === 1 ? "" : "s"}`,
               inline: true,
             },
           ]);
