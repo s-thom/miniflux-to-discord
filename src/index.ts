@@ -59,7 +59,12 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
 
         const builder = new EmbedBuilder()
           .setTitle(entry.title)
-          .setURL(new URL(`/unread/${entry.id}`, MINIFLUX_BASE_URL).toString())
+          .setURL(
+            new URL(
+              `/feed/${feed.id}/entry/${entry.id}`,
+              MINIFLUX_BASE_URL
+            ).toString()
+          )
           .setAuthor({
             name: feed.title,
           })
