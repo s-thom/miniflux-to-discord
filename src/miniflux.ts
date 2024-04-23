@@ -41,6 +41,14 @@ export interface Icon {
   mime_type: string;
 }
 
+function safeEqual(a: Buffer, b: Buffer) {
+  try {
+    return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  } catch (err) {
+    return false;
+  }
+}
+
 export function getSignatureCheckHook(secret: string): any {
   const hook: preValidationAsyncHookHandler = async (req, res) => {
     const signatureHeader = req.headers["x-miniflux-signature"] as string;
@@ -61,10 +69,7 @@ export function getSignatureCheckHook(secret: string): any {
       .toLowerCase();
 
     if (
-      !timingSafeEqual(
-        Buffer.from(signatureHeader),
-        Buffer.from(computedSignature)
-      )
+      !safeEqual(Buffer.from(signatureHeader), Buffer.from(computedSignature))
     ) {
       req.log.error("Invalid signature");
       throw new Error("Invalid signature");
