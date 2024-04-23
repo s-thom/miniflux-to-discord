@@ -42,8 +42,6 @@ export interface Icon {
 }
 
 export function getSignatureCheckHook(secret: string): any {
-  const hmac = createHmac("sha256", secret);
-
   const hook: preValidationAsyncHookHandler = async (req, res) => {
     const signatureHeader = req.headers["x-miniflux-signature"] as string;
     if (!signatureHeader) {
@@ -57,7 +55,7 @@ export function getSignatureCheckHook(secret: string): any {
       res.code(500);
       throw new Error("Internal error in validation");
     }
-    const computedSignature = hmac
+    const computedSignature = createHmac("sha256", secret)
       .update((req as any).rawBody)
       .digest("hex")
       .toLowerCase();
