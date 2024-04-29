@@ -11,7 +11,7 @@
   "author": "Stuart Thomson",
   "license": "MPL-2.0",
   "devDependencies": {
-    "@flydotio/dockerfile": "^0.5.5",
+    "@flydotio/dockerfile": "^0.5.6",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.12.7",
     "prettier": "^3.2.5",
@@ -28,7 +28,7 @@
     "p-queue": "^8.0.1",
     "raw-body": "^2.5.2",
     "secure-json-parse": "^2.7.0",
-    "zod": "^3.22.5"
+    "zod": "^3.23.4"
   },
   "dockerfile": {
     "cmd": "[ \"node\", \"dist/index.js\" ]",
