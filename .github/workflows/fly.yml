@@ -10,14 +10,9 @@ jobs:
     name: Deploy (${{ matrix.fly-config }})
     runs-on: ubuntu-latest
     if: ${{ (github.ref == 'refs/heads/main') && github.event_name == 'push' }}
-    strategy:
-      matrix:
-        fly-config:
-          - fly.toml
-          - fly-two.toml
 
     concurrency:
-      group: "deploy-${{ matrix.fly-config }}"
+      group: "deploy"
       cancel-in-progress: true
 
     steps:
@@ -28,6 +23,6 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
-        run: flyctl deploy --config "${{ matrix.fly-config }}" --remote-only
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
