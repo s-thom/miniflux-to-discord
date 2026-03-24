@@ -25,7 +25,7 @@ const MINIFLUX_WEBHOOK_SECRET = getRequiredEnv("MINIFLUX_WEBHOOK_SECRET");
 const MINIFLUX_BASE_URL = getRequiredEnv("MINIFLUX_BASE_URL");
 if (missingEnv.length > 0) {
   server.logger.fatal(
-    `Missing required environment variables: ${missingEnv.join(", ")}`
+    `Missing required environment variables: ${missingEnv.join(", ")}`,
   );
   process.exit(1);
 }
@@ -40,8 +40,8 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
     batches.push(
       entriesClone.splice(
         0,
-        Math.min(entriesClone.length, DISCORD_MAX_EMBEDS_PER_MESSAGE)
-      )
+        Math.min(entriesClone.length, DISCORD_MAX_EMBEDS_PER_MESSAGE),
+      ),
     );
   }
 
@@ -62,8 +62,8 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
           .setURL(
             new URL(
               `/feed/${feed.id}/entry/${entry.id}`,
-              MINIFLUX_BASE_URL
-            ).toString()
+              MINIFLUX_BASE_URL,
+            ).toString(),
           )
           .setAuthor({
             name: feed.title,
@@ -99,7 +99,7 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
         if (icon) {
           const [typeBase64, data] = icon.data.split(",");
           const ext = extension(typeBase64);
-          let dataArray = Buffer.from(data, "base64");
+          let dataArray: Buffer<ArrayBufferLike> = Buffer.from(data, "base64");
 
           // As far as I can tell, Miniflux is always returning an ico file.
           if (ext === "ico") {
@@ -118,7 +118,7 @@ async function sendEntriesToDiscord(entries: NewEntry[]) {
         }
 
         return builder;
-      })
+      }),
     );
 
     await webhookClient.send({ embeds, files });
@@ -147,5 +147,5 @@ server.addRoute({
 
 await server.listen(
   process.env.LISTEN_HOST ?? "127.0.0.1",
-  parseInt(process.env.LISTEN_PORT ?? "80")
+  parseInt(process.env.LISTEN_PORT ?? "80"),
 );

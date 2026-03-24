@@ -15,8 +15,6 @@ export class DiscordWebhookClient {
   }
 
   send(message: string | MessagePayload | WebhookMessageCreateOptions) {
-    return this.queue.add(() => this.client.send(message), {
-      throwOnTimeout: true,
-    });
+    return this.queue.add(() => this.client.send(message));
   }
 }

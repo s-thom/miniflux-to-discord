@@ -11,24 +11,24 @@
   "author": "Stuart Thomson",
   "license": "MPL-2.0",
   "devDependencies": {
-    "@flydotio/dockerfile": "^0.5.7",
-    "@types/mime-types": "^2.1.4",
-    "@types/node": "^20.12.11",
-    "prettier": "^3.2.5",
-    "prettier-plugin-organize-imports": "^3.2.4",
-    "typescript": "^5.4.5"
+    "@flydotio/dockerfile": "^0.7.10",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^24.12.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "typescript": "^6.0.2"
   },
   "dependencies": {
-    "discord.js": "^14.15.2",
-    "dotenv": "^16.4.5",
-    "fastify": "^4.27.0",
-    "fastify-type-provider-zod": "^1.1.9",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.3.1",
+    "fastify": "^5.8.4",
+    "fastify-type-provider-zod": "^6.1.0",
     "ico-to-png": "^0.2.1",
-    "mime-types": "^2.1.35",
-    "p-queue": "^8.0.1",
-    "raw-body": "^2.5.2",
-    "secure-json-parse": "^2.7.0",
-    "zod": "^3.23.8"
+    "mime-types": "^3.0.2",
+    "p-queue": "^9.1.0",
+    "raw-body": "^3.0.2",
+    "secure-json-parse": "^4.1.0",
+    "zod": "^4.3.6"
   },
   "dockerfile": {
     "cmd": "[ \"node\", \"dist/index.js\" ]",

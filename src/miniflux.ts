@@ -94,17 +94,14 @@ export class MinifluxClient {
   }
 
   private async get<T>(path: string): Promise<T> {
-    return this.queue.add(
-      async () => {
-        const response = await fetch(new URL(path, this.baseUrl), {
-          method: "GET",
-          headers: { "X-Auth-Token": this.apiKey },
-        });
-        const body = await response.json();
-        return body as T;
-      },
-      { throwOnTimeout: true }
-    );
+    return this.queue.add(async () => {
+      const response = await fetch(new URL(path, this.baseUrl), {
+        method: "GET",
+        headers: { "X-Auth-Token": this.apiKey },
+      });
+      const body = await response.json();
+      return body as T;
+    });
   }
 
   async getFeed(id: number): Promise<Feed> {
