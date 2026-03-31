@@ -13,13 +13,13 @@
   "devDependencies": {
     "@flydotio/dockerfile": "^0.7.10",
     "@types/mime-types": "^3.0.1",
-    "@types/node": "^24.12.0",
+    "@types/node": "^25.5.0",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "discord.js": "^14.25.1",
+    "discord.js": "^14.26.0",
     "dotenv": "^17.3.1",
     "fastify": "^5.8.4",
     "fastify-type-provider-zod": "^6.1.0",
